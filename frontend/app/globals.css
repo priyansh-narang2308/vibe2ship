@@ -181,6 +181,10 @@
   animation: pulseGlow 2.5s infinite ease-in-out;
 }
 
+@utility animate-slideIn {
+  animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -211,6 +215,17 @@
   50% {
     opacity: 1;
     box-shadow: 0 0 25px 4px rgba(99, 102, 241, 0.18);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
