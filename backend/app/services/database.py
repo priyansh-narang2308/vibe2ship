@@ -151,3 +151,24 @@ async def update_issue_status(issue_id: str, status: str, log_entry: Optional[Di
         updates["agent_logs"] = firestore.ArrayUnion([log_entry])
         
     doc_ref.update(updates)
+
+async def get_all_issues(limit: int = 50) -> List[Dict[str, Any]]:
+    """Retrieve all issues from Firestore, ordered by creation time descending."""
+    db = get_db()
+    if db is None:
+        return []
+    
+    issues_ref = db.collection("issues")
+    query = issues_ref.order_by("created_at", direction=firestore.Query.DESCENDING).limit(limit)
+    
+    issues = []
+    for doc in query.stream():
+        data = doc.to_dict()
+        data["id"] = doc.id
+        # Convert Timestamp objects to ISO strings for JSON serialization
+        for key, val in data.items():
+            if hasattr(val, "isoformat"):
+                data[key] = val.isoformat()
+        issues.append(data)
+    
+    return issues

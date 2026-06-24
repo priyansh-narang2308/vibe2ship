@@ -10,9 +10,6 @@ from app.services.database import create_issue, update_issue_status
 class ExecutionAgent(BaseAgent):
     def __init__(self):
         super().__init__("ExecutionAgent")
-        # Keep track of generated document URL during execution sequence
-        self.complaint_url = None
-        self.local_pdf_path = None
 
     async def run(
         self,
@@ -24,6 +21,8 @@ class ExecutionAgent(BaseAgent):
         await self.log("Starting execution of the Planner's action strategy...", "INFO", log_callback)
         execution_log = []
         issue_id = original_report_data.get("id")
+        complaint_url = None
+        local_pdf_path = None
 
         for task in action_plan.tasks:
             task_type = task.action_type
@@ -38,19 +37,19 @@ class ExecutionAgent(BaseAgent):
                     # Determine output path inside the workspace backend tmp directory
                     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
                     tmp_dir = os.path.join(base_dir, "tmp", "complaints")
-                    self.local_pdf_path = os.path.join(tmp_dir, f"{issue_id}.pdf")
+                    local_pdf_path = os.path.join(tmp_dir, f"{issue_id}.pdf")
                     
                     # Generate the PDF complaint
-                    generate_complaint_pdf(action_plan.complaint_document_spec, self.local_pdf_path)
-                    await self.log(f"Generated local PDF at {self.local_pdf_path}", "INFO", log_callback)
+                    generate_complaint_pdf(action_plan.complaint_document_spec, local_pdf_path)
+                    await self.log(f"Generated local PDF at {local_pdf_path}", "INFO", log_callback)
                     
                     # Upload PDF to GCS
                     blob_name = f"complaints/{issue_id}.pdf"
-                    self.complaint_url = upload_pdf_to_gcs(self.local_pdf_path, blob_name)
-                    await self.log(f"Complaint PDF uploaded to Cloud Storage. URL: {self.complaint_url}", "SUCCESS", log_callback)
+                    complaint_url = upload_pdf_to_gcs(local_pdf_path, blob_name)
+                    await self.log(f"Complaint PDF uploaded to Cloud Storage. URL: {complaint_url}", "SUCCESS", log_callback)
                     
                     success = True
-                    result_payload = {"complaint_url": self.complaint_url}
+                    result_payload = {"complaint_url": complaint_url}
 
                 elif task_type == "POST_DASHBOARD":
                     # Build full issue payload for Firestore
@@ -58,7 +57,7 @@ class ExecutionAgent(BaseAgent):
                         **original_report_data,
                         "status": "SUBMITTED",
                         "priority_score": task.payload.get("priority_score", 50.0),
-                        "complaint_url": self.complaint_url,
+                        "complaint_url": complaint_url,
                         "action_plan": action_plan.model_dump(),
                         "agent_logs": [
                             {
@@ -87,7 +86,7 @@ class ExecutionAgent(BaseAgent):
                     
                     An urgent civic infrastructure issue has been reported in your jurisdiction and validated by the CivicPulse community verification network.
                     
-                    A formal complaint document has been compiled and is attached to this email. You can also view it directly here: {self.complaint_url}
+                    A formal complaint document has been compiled and is attached to this email. You can also view it directly here: {complaint_url}
                     
                     Please review this defect report and initiate resolution procedures immediately. We have set a standard SLA window of 48 hours for acknowledgement.
                     
@@ -100,7 +99,7 @@ class ExecutionAgent(BaseAgent):
                         to_email=to_email,
                         subject=subject,
                         body=email_body,
-                        attachment_path=self.local_pdf_path
+                        attachment_path=local_pdf_path
                     )
                     
                     if email_success:

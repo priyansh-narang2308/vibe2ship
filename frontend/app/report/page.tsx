@@ -2,17 +2,17 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Mic, MicOff, AlertCircle, ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
+import { Mic, AlertCircle, ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
 import MediaPicker from "@/components/MediaPicker";
 import LocationPicker from "@/components/LocationPicker";
-import { GPSLocation } from "@/lib/api";
+import { GPSLocation, submitReport } from "@/lib/api";
 
 export default function ReportPage() {
   const router = useRouter();
   
   // State
   const [mediaUrl, setMediaUrl] = useState<string>("");
-  const [fileType, setFileType] = useState<"image" | "video" | "null">("null");
+  const [fileType, setFileType] = useState<"image" | "video" | null>(null);
   const [location, setLocation] = useState<GPSLocation>({ latitude: 12.972, longitude: 77.642 });
   const [description, setDescription] = useState<string>("");
   const [isRecording, setIsRecording] = useState(false);
@@ -22,6 +22,7 @@ export default function ReportPage() {
   // Voice recording logic using native Web Speech API
   const handleVoiceInput = () => {
     const SpeechRecognition = 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
@@ -37,13 +38,14 @@ export default function ReportPage() {
     const recognition = new SpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = false;
-    recognition.lang = "en-IN"; // Set locale to Indian English for accent compatibility
+    recognition.lang = "en-IN";
 
     recognition.onstart = () => {
       setIsRecording(true);
       setFormError(null);
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recognition.onerror = (e: any) => {
       console.error("Speech recognition error", e);
       setIsRecording(false);
@@ -54,6 +56,7 @@ export default function ReportPage() {
       setIsRecording(false);
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
       setDescription(prev => prev ? `${prev} ${transcript}` : transcript);
@@ -74,21 +77,33 @@ export default function ReportPage() {
     setIsSubmitting(true);
     const reportId = `report-${Math.random().toString(36).substring(2, 11)}`;
 
+    const reportPayload = {
+      id: reportId,
+      citizen_id: "citizen_outfit_33",
+      media_url: mediaUrl,
+      location: location,
+      description: description,
+      timestamp: new Date().toISOString()
+    };
+
+    // Save to localStorage as fallback (for tracking page)
+    localStorage.setItem(`pending-report-${reportId}`, JSON.stringify(reportPayload));
+
     try {
-      const reportPayload = {
-        id: reportId,
-        citizen_id: "citizen_outfit_33",
-        media_url: mediaUrl,
-        location: location,
-        description: description,
-        timestamp: new Date().toISOString()
-      };
+      // Try to submit to backend API
+      const result = await submitReport(reportId, {
+        citizen_id: reportPayload.citizen_id,
+        media_url: reportPayload.media_url,
+        location: reportPayload.location,
+        description: reportPayload.description,
+      });
       
-      localStorage.setItem(`pending-report-${reportId}`, JSON.stringify(reportPayload));
+      // Store the full result for the tracking page
+      localStorage.setItem(`pipeline-result-${reportId}`, JSON.stringify(result));
       router.push(`/track/${reportId}`);
-    } catch (err: any) {
-      setFormError(err.message || "Failed to initiate submission.");
-      setIsSubmitting(false);
+    } catch {
+      // Backend unavailable — fall back to WebSocket simulation on tracking page
+      router.push(`/track/${reportId}`);
     }
   };
 
@@ -129,7 +144,7 @@ export default function ReportPage() {
             }} 
             onClear={() => {
               setMediaUrl("");
-              setFileType("null");
+              setFileType(null);
             }}
           />
 

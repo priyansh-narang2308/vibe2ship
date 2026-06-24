@@ -7,6 +7,7 @@ from app.routers.ws import router as ws_router
 from app.agents.orchestrator import CivicOrchestrator
 from app.agents.escalation import EscalationAgent
 from app.services.firebase import initialize_firebase
+from app.services.database import get_all_issues
 from datetime import datetime
 
 # Initialize Firebase on startup
@@ -46,6 +47,18 @@ async def health_check():
     return {
         "status": "healthy"
     }
+
+@app.get("/api/v1/issues")
+async def list_issues(limit: int = 50):
+    """Retrieve all active civic issues from Firestore."""
+    try:
+        issues = await get_all_issues(limit=limit)
+        return {"issues": issues, "count": len(issues)}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve issues: {str(e)}"
+        )
 
 @app.post("/api/v1/report", response_model=IssueResult, status_code=status.HTTP_201_CREATED)
 async def submit_report(report: CitizenReport):

@@ -33,7 +33,7 @@ CivicPulse operates on a decentralized, agentic architecture. The `CivicOrchestr
 ## Technology Stack
 
 ### Frontend Application
-*   Framework: Next.js 14
+*   Framework: Next.js 16 (App Router)
 *   Language: TypeScript
 *   Styling: Tailwind CSS
 *   Icons: Lucide React

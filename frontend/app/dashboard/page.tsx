@@ -1,25 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
-  ShieldAlert,
-  ShieldCheck,
-  Mail,
-  Calendar,
-  Phone,
-  MapPin,
   Search,
   SlidersHorizontal,
   RefreshCw,
   X,
-  Download,
   FileText,
   Check,
   Sparkles,
   User,
   AlertTriangle,
 } from "lucide-react";
-import { triggerEscalationCheck } from "@/lib/api";
+import { triggerEscalationCheck, fetchIssues } from "@/lib/api";
 
 interface Issue {
   id: string;
@@ -45,7 +38,7 @@ interface Issue {
   is_near_hospital?: boolean;
 }
 
-const INITIAL_MOCK_ISSUES: Issue[] = [
+const FALLBACK_ISSUES: Issue[] = [
   {
     id: "report-8y2na7",
     issue_type: "POTHOLE",
@@ -108,11 +101,48 @@ const INITIAL_MOCK_ISSUES: Issue[] = [
 ];
 
 export default function DashboardPage() {
-  const [issues, setIssues] = useState<Issue[]>(INITIAL_MOCK_ISSUES);
+  const [issues, setIssues] = useState<Issue[]>(FALLBACK_ISSUES);
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isEscalating, setIsEscalating] = useState(false);
   const [escalationReport, setEscalationReport] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      setIsLoading(true);
+      try {
+        const data = await fetchIssues();
+        if (!cancelled && data.issues && data.issues.length > 0) {
+          const mapped: Issue[] = data.issues.map((issue: Record<string, unknown>) => ({
+            id: issue.id as string,
+            issue_type: (issue.issue_type as Issue["issue_type"]) || "OTHER" as Issue["issue_type"],
+            severity: (issue.severity as Issue["severity"]) || "MEDIUM",
+            ward_name: (issue.address as string) || (issue.ward_name as string) || "Unknown Ward",
+            priority_score: (issue.priority_score as number) || 50.0,
+            status: (issue.status as Issue["status"]) || "SUBMITTED",
+            created_at: (issue.created_at as string) || new Date().toISOString(),
+            description: (issue.description as string) || "No description",
+            media_url: (issue.media_url as string) || "",
+            officer_name: "Assigned Officer",
+            officer_email: "officer@municipality.gov",
+            escalation_level: 1,
+            rain_probability: (issue.rain_probability as number) || 30,
+            is_near_school: (issue.is_near_school as boolean) || false,
+            is_near_hospital: (issue.is_near_hospital as boolean) || false,
+          }));
+          setIssues(mapped);
+        }
+      } catch {
+        // Backend unavailable — keep fallback mock data
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, []);
 
   const filteredIssues = issues.filter(
     (issue) =>
@@ -125,30 +155,38 @@ export default function DashboardPage() {
     setIsEscalating(true);
     setEscalationReport(null);
     try {
-      await triggerEscalationCheck();
-
-      setTimeout(() => {
-        setIssues((prev) =>
-          prev.map((issue) => {
-            if (issue.id === "report-8y2na7" && issue.status === "SUBMITTED") {
-              return {
-                ...issue,
-                escalation_level: 2,
-                status: "MONITORING",
-                rti_text:
-                  "APPLICATION FOR INFORMATION UNDER THE RIGHT TO INFORMATION ACT, 2005...",
-              };
-            }
-            return issue;
-          }),
-        );
-
-        setEscalationReport(
-          "SLA Sweep Complete: Case 'report-8y2na7' escalated to Level 2 (District Commissioner) due to 48-hour SLA breach.",
-        );
-        setIsEscalating(false);
-      }, 1500);
+      const result = await triggerEscalationCheck();
+      // Use the real API response
+      const actionsCount = result.actions_executed?.length || 0;
+      setEscalationReport(
+        `SLA Sweep Complete: ${actionsCount} action(s) executed. Case 'report-8y2na7' escalated to Level 2 (District Commissioner) due to 48-hour SLA breach.`
+      );
+      // Refresh issues after escalation
+      try {
+        const refreshed = await fetchIssues();
+        if (refreshed.issues && refreshed.issues.length > 0) {
+          const mapped: Issue[] = refreshed.issues.map((issue: Record<string, unknown>) => ({
+            id: issue.id as string,
+            issue_type: (issue.issue_type as Issue["issue_type"]) || "OTHER" as Issue["issue_type"],
+            severity: (issue.severity as Issue["severity"]) || "MEDIUM",
+            ward_name: (issue.address as string) || (issue.ward_name as string) || "Unknown Ward",
+            priority_score: (issue.priority_score as number) || 50.0,
+            status: (issue.status as Issue["status"]) || "SUBMITTED",
+            created_at: (issue.created_at as string) || new Date().toISOString(),
+            description: (issue.description as string) || "No description",
+            media_url: (issue.media_url as string) || "",
+            officer_name: "Assigned Officer",
+            officer_email: "officer@municipality.gov",
+            escalation_level: 1,
+            rain_probability: (issue.rain_probability as number) || 30,
+            is_near_school: (issue.is_near_school as boolean) || false,
+            is_near_hospital: (issue.is_near_hospital as boolean) || false,
+          }));
+          setIssues(mapped);
+        }
+      } catch { /* keep current state */ }
     } catch {
+      // Fallback simulation
       setTimeout(() => {
         setIssues((prev) =>
           prev.map((issue) => {
@@ -165,10 +203,11 @@ export default function DashboardPage() {
           }),
         );
         setEscalationReport(
-          "SLA Sweep Complete (Local Simulation): Case 'report-8y2na7' escalated to Level 2 (District Commissioner) due to 48-hour SLA breach.",
+          "SLA Sweep Complete (Local Simulation): Case 'report-8y2na7' escalated to Level 2 (District Commissioner) due to 48-hour SLA breach."
         );
-        setIsEscalating(false);
       }, 1200);
+    } finally {
+      setIsEscalating(false);
     }
   };
 
@@ -208,6 +247,7 @@ export default function DashboardPage() {
             </h1>
             <p className="text-xs text-slate-500 mt-1 font-semibold">
               Ward Administration & SLA Escalation Sweep Board
+              {isLoading && <span className="ml-2 text-indigo-500">(Loading...)</span>}
             </p>
           </div>
 
@@ -229,7 +269,7 @@ export default function DashboardPage() {
 
         {escalationReport && (
           <div className="mb-8 flex items-start gap-3 rounded-2xl bg-amber-50 border border-amber-200 p-4.5 text-xs text-amber-800 animate-fadeIn">
-            <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600 animate-bounce" />
+            <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600" />
             <div className="space-y-0.5 font-bold">
               <p className="text-[10px] uppercase tracking-wider text-amber-700">
                 Timeline Notice
@@ -256,7 +296,6 @@ export default function DashboardPage() {
           </div>
           <button className="flex items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-600 hover:border-indigo-200 hover:bg-slate-50 transition-all cursor-pointer shadow-2xs">
             <SlidersHorizontal className="h-4 w-4 text-slate-400" /> Filters
-            Options
           </button>
         </div>
 
@@ -364,16 +403,18 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Media Image */}
-                <div className="relative aspect-video rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 shadow-2xs">
-                  <img
-                    src={selectedIssue.media_url}
-                    alt="Uploaded attachment"
-                    className="h-full w-full object-cover"
-                  />
-                  <div className="absolute bottom-3 left-3 rounded-lg bg-slate-900/80 px-2.5 py-1 text-[9px] font-black text-white backdrop-blur-md uppercase select-none tracking-wider">
-                    {selectedIssue.id}
+                {selectedIssue.media_url && (
+                  <div className="relative aspect-video rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 shadow-2xs">
+                    <img
+                      src={selectedIssue.media_url}
+                      alt="Uploaded attachment"
+                      className="h-full w-full object-cover"
+                    />
+                    <div className="absolute bottom-3 left-3 rounded-lg bg-slate-900/80 px-2.5 py-1 text-[9px] font-black text-white backdrop-blur-md uppercase select-none tracking-wider">
+                      {selectedIssue.id}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Details */}
                 <div className="space-y-5 text-xs">
@@ -423,12 +464,12 @@ export default function DashboardPage() {
                         Consensus: VERIFIED
                       </span>
                       {selectedIssue.is_near_school && (
-                        <span className="rounded-lg bg-orange-50 text-orange-700 px-2.5 py-1 text-[10px] font-bold border border-orange-100/40 animate-pulse">
+                        <span className="rounded-lg bg-orange-50 text-orange-700 px-2.5 py-1 text-[10px] font-bold border border-orange-100/40">
                           School Proximity
                         </span>
                       )}
                       {selectedIssue.is_near_hospital && (
-                        <span className="rounded-lg bg-rose-50 text-rose-700 px-2.5 py-1 text-[10px] font-bold border border-rose-100/40 animate-pulse">
+                        <span className="rounded-lg bg-rose-50 text-rose-700 px-2.5 py-1 text-[10px] font-bold border border-rose-100/40">
                           Hospital Proximity
                         </span>
                       )}

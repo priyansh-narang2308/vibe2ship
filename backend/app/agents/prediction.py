@@ -13,10 +13,10 @@ class PredictionAgent(BaseAgent):
         self,
         report: CitizenReport,
         historical_ctx: HistoricalContext,
-        research_ctx: ResearchEnrichment
+        research_ctx: ResearchEnrichment,
+        issue_type_val: str = "OTHER"
     ) -> PredictionOutput:
         """Calculate a deterministic fallback risk prediction in case the Gemini API fails/is unavailable."""
-        issue_type_val = getattr(report, "issue_type", "OTHER")  # Fallback check if parsed earlier
         
         # Base risk calculation
         risk = 20.0
@@ -144,7 +144,7 @@ class PredictionAgent(BaseAgent):
                 "WARNING",
                 log_callback
             )
-            fallback = self._get_fallback_prediction(report, historical_ctx, research_ctx)
+            fallback = self._get_fallback_prediction(report, historical_ctx, research_ctx, issue_type)
             await self.log(
                 f"Fallback model generated. Risk Score: {fallback.risk_score}/100, Est. Daily Cost: INR {fallback.economic_impact_estimate}, Impacted Population: {fallback.population_affected_estimate} citizens",
                 "SUCCESS",

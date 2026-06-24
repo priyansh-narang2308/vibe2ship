@@ -1,7 +1,7 @@
 import asyncio
 from typing import Optional, Dict, Any, Callable
 from app.agents.base import LogCallback
-from app.models.schemas import CitizenReport, IssueResult, IssueStatus
+from app.models.schemas import CitizenReport, IssueResult, IssueStatus, IssueType
 from app.agents.memory import MemoryAgent
 from app.agents.research import ResearchAgent
 from app.agents.verification import VerificationAgent
@@ -38,8 +38,8 @@ class CivicOrchestrator:
         if log_callback:
             await log_callback("Orchestrator", "PHASE 1: Launching Memory and Research agents in parallel...", "INFO")
             
-        # We temporarily assume a default issue type for geolookup and matching prior to vision verification
-        initial_type = report.description or "POTHOLE"
+        # Default issue type for geolookup prior to vision verification
+        initial_type = IssueType.POTHOLE
         
         # Async parallel execution of Memory & Research
         memory_task = self.memory_agent.run(
