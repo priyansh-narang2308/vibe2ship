@@ -12,7 +12,7 @@ import {
   User,
   AlertTriangle,
 } from "lucide-react";
-import { triggerEscalationCheck, fetchIssues } from "@/lib/api";
+import { triggerEscalationCheck, fetchIssues } from "../../lib/api";
 
 interface Issue {
   id: string;
@@ -115,23 +115,31 @@ export default function DashboardPage() {
       try {
         const data = await fetchIssues();
         if (!cancelled && data.issues && data.issues.length > 0) {
-          const mapped: Issue[] = data.issues.map((issue: Record<string, unknown>) => ({
-            id: issue.id as string,
-            issue_type: (issue.issue_type as Issue["issue_type"]) || "OTHER" as Issue["issue_type"],
-            severity: (issue.severity as Issue["severity"]) || "MEDIUM",
-            ward_name: (issue.address as string) || (issue.ward_name as string) || "Unknown Ward",
-            priority_score: (issue.priority_score as number) || 50.0,
-            status: (issue.status as Issue["status"]) || "SUBMITTED",
-            created_at: (issue.created_at as string) || new Date().toISOString(),
-            description: (issue.description as string) || "No description",
-            media_url: (issue.media_url as string) || "",
-            officer_name: "Assigned Officer",
-            officer_email: "officer@municipality.gov",
-            escalation_level: 1,
-            rain_probability: (issue.rain_probability as number) || 30,
-            is_near_school: (issue.is_near_school as boolean) || false,
-            is_near_hospital: (issue.is_near_hospital as boolean) || false,
-          }));
+          const mapped: Issue[] = data.issues.map(
+            (issue: Record<string, unknown>) => ({
+              id: issue.id as string,
+              issue_type:
+                (issue.issue_type as Issue["issue_type"]) ||
+                ("OTHER" as Issue["issue_type"]),
+              severity: (issue.severity as Issue["severity"]) || "MEDIUM",
+              ward_name:
+                (issue.address as string) ||
+                (issue.ward_name as string) ||
+                "Unknown Ward",
+              priority_score: (issue.priority_score as number) || 50.0,
+              status: (issue.status as Issue["status"]) || "SUBMITTED",
+              created_at:
+                (issue.created_at as string) || new Date().toISOString(),
+              description: (issue.description as string) || "No description",
+              media_url: (issue.media_url as string) || "",
+              officer_name: "Assigned Officer",
+              officer_email: "officer@municipality.gov",
+              escalation_level: 1,
+              rain_probability: (issue.rain_probability as number) || 30,
+              is_near_school: (issue.is_near_school as boolean) || false,
+              is_near_hospital: (issue.is_near_hospital as boolean) || false,
+            }),
+          );
           setIssues(mapped);
         }
       } catch {
@@ -141,7 +149,9 @@ export default function DashboardPage() {
       }
     };
     load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const filteredIssues = issues.filter(
@@ -159,32 +169,42 @@ export default function DashboardPage() {
       // Use the real API response
       const actionsCount = result.actions_executed?.length || 0;
       setEscalationReport(
-        `SLA Sweep Complete: ${actionsCount} action(s) executed. Case 'report-8y2na7' escalated to Level 2 (District Commissioner) due to 48-hour SLA breach.`
+        `SLA Sweep Complete: ${actionsCount} action(s) executed. Case 'report-8y2na7' escalated to Level 2 (District Commissioner) due to 48-hour SLA breach.`,
       );
       // Refresh issues after escalation
       try {
         const refreshed = await fetchIssues();
         if (refreshed.issues && refreshed.issues.length > 0) {
-          const mapped: Issue[] = refreshed.issues.map((issue: Record<string, unknown>) => ({
-            id: issue.id as string,
-            issue_type: (issue.issue_type as Issue["issue_type"]) || "OTHER" as Issue["issue_type"],
-            severity: (issue.severity as Issue["severity"]) || "MEDIUM",
-            ward_name: (issue.address as string) || (issue.ward_name as string) || "Unknown Ward",
-            priority_score: (issue.priority_score as number) || 50.0,
-            status: (issue.status as Issue["status"]) || "SUBMITTED",
-            created_at: (issue.created_at as string) || new Date().toISOString(),
-            description: (issue.description as string) || "No description",
-            media_url: (issue.media_url as string) || "",
-            officer_name: "Assigned Officer",
-            officer_email: "officer@municipality.gov",
-            escalation_level: 1,
-            rain_probability: (issue.rain_probability as number) || 30,
-            is_near_school: (issue.is_near_school as boolean) || false,
-            is_near_hospital: (issue.is_near_hospital as boolean) || false,
-          }));
+          const mapped: Issue[] = refreshed.issues.map(
+            (issue: Record<string, unknown>) => ({
+              id: issue.id as string,
+              issue_type:
+                (issue.issue_type as Issue["issue_type"]) ||
+                ("OTHER" as Issue["issue_type"]),
+              severity: (issue.severity as Issue["severity"]) || "MEDIUM",
+              ward_name:
+                (issue.address as string) ||
+                (issue.ward_name as string) ||
+                "Unknown Ward",
+              priority_score: (issue.priority_score as number) || 50.0,
+              status: (issue.status as Issue["status"]) || "SUBMITTED",
+              created_at:
+                (issue.created_at as string) || new Date().toISOString(),
+              description: (issue.description as string) || "No description",
+              media_url: (issue.media_url as string) || "",
+              officer_name: "Assigned Officer",
+              officer_email: "officer@municipality.gov",
+              escalation_level: 1,
+              rain_probability: (issue.rain_probability as number) || 30,
+              is_near_school: (issue.is_near_school as boolean) || false,
+              is_near_hospital: (issue.is_near_hospital as boolean) || false,
+            }),
+          );
           setIssues(mapped);
         }
-      } catch { /* keep current state */ }
+      } catch {
+        /* keep current state */
+      }
     } catch {
       // Fallback simulation
       setTimeout(() => {
@@ -203,7 +223,7 @@ export default function DashboardPage() {
           }),
         );
         setEscalationReport(
-          "SLA Sweep Complete (Local Simulation): Case 'report-8y2na7' escalated to Level 2 (District Commissioner) due to 48-hour SLA breach."
+          "SLA Sweep Complete (Local Simulation): Case 'report-8y2na7' escalated to Level 2 (District Commissioner) due to 48-hour SLA breach.",
         );
       }, 1200);
     } finally {
@@ -247,7 +267,9 @@ export default function DashboardPage() {
             </h1>
             <p className="text-xs text-slate-500 mt-1 font-semibold">
               Ward Administration & SLA Escalation Sweep Board
-              {isLoading && <span className="ml-2 text-indigo-500">(Loading...)</span>}
+              {isLoading && (
+                <span className="ml-2 text-indigo-500">(Loading...)</span>
+              )}
             </p>
           </div>
 
