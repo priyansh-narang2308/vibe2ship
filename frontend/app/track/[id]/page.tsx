@@ -20,12 +20,12 @@ import {
   MapPin,
   Clock,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
 import AgentStatusPanel from "@/components/AgentStatusPanel";
 import IssueMap from "@/components/IssueMap";
-import { ReportPayload } from "@/lib/api";
+import { ReportPayload } from "../lib/api";
 
 export default function TrackPage() {
   const params = useParams();
@@ -57,7 +57,9 @@ export default function TrackPage() {
       <div className="flex flex-1 items-center justify-center bg-background min-h-[500px]">
         <div className="flex flex-col items-center gap-3">
           <span className="h-8 w-8 animate-spin rounded-full border-3 border-indigo-600 border-t-transparent" />
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Loading Telemetry...</span>
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+            Loading Telemetry...
+          </span>
         </div>
       </div>
     );
@@ -69,15 +71,16 @@ export default function TrackPage() {
 
   return (
     <main className="flex-1 bg-background relative py-12 px-4 sm:px-6 lg:px-8 bg-grid-dots">
-      
       {/* Background soft glow blobs */}
       <div className="absolute top-[-5%] right-[-5%] w-[45%] h-[45%] rounded-full bg-indigo-100/10 blur-[100px] pointer-events-none" />
 
       <div className="mx-auto max-w-7xl relative z-10">
-        
         {/* Breadcrumb / Back Link */}
         <div className="mb-6">
-          <Link href="/report" className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors cursor-pointer select-none">
+          <Link
+            href="/report"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors cursor-pointer select-none"
+          >
             <ArrowLeft className="h-4 w-4" /> Back to submission
           </Link>
         </div>
@@ -87,7 +90,8 @@ export default function TrackPage() {
           <div>
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 border border-indigo-100/40 px-3 py-1 text-[9px] font-black text-indigo-700 uppercase tracking-widest">
-                <Activity className="h-3 w-3 animate-pulse" /> Active Node Triage
+                <Activity className="h-3 w-3 animate-pulse" /> Active Node
+                Triage
               </span>
               <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
               <span className="text-[10px] font-black font-mono text-slate-500 uppercase tracking-wider">
@@ -114,10 +118,8 @@ export default function TrackPage() {
 
         {/* Dual Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
           {/* LEFT COLUMN: Media Preview + WebSocket Console */}
           <div className="lg:col-span-5 space-y-6">
-            
             {/* Visual Evidence Summary */}
             <div className="rounded-3xl border border-slate-200/60 bg-white p-5.5 shadow-premium hover-lift">
               <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4 select-none">
@@ -134,12 +136,18 @@ export default function TrackPage() {
 
               <div className="mt-5 space-y-3">
                 <p className="text-slate-600 font-bold text-xs leading-relaxed italic bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100">
-                  &ldquo;{report.description || "No description metrics provided by sender"}&rdquo;
+                  &ldquo;
+                  {report.description ||
+                    "No description metrics provided by sender"}
+                  &rdquo;
                 </p>
                 <div className="flex items-center justify-between text-xs pt-3 border-t border-slate-100 select-none">
-                  <span className="font-black uppercase tracking-wider text-slate-400 text-[10px]">Geographic Coordinate</span>
+                  <span className="font-black uppercase tracking-wider text-slate-400 text-[10px]">
+                    Geographic Coordinate
+                  </span>
                   <span className="font-mono text-slate-700 font-bold flex items-center gap-1 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-lg">
-                    <MapPin className="h-3.5 w-3.5 text-indigo-500" /> {report.location.latitude}, {report.location.longitude}
+                    <MapPin className="h-3.5 w-3.5 text-indigo-500" />{" "}
+                    {report.location.latitude}, {report.location.longitude}
                   </span>
                 </div>
               </div>
@@ -164,32 +172,38 @@ export default function TrackPage() {
                   Running Agent Collaboration
                 </h3>
                 <p className="text-xs text-slate-500 mt-2.5 max-w-sm leading-relaxed font-semibold">
-                  Our autonomous agents are compiling records, cross-referencing district boundaries, auditing verification evidence via multimodal models, and generating strategic action plans.
+                  Our autonomous agents are compiling records, cross-referencing
+                  district boundaries, auditing verification evidence via
+                  multimodal models, and generating strategic action plans.
                 </p>
-                
+
                 {/* Visual diagnostic simulation */}
                 <div className="mt-8 w-full max-w-xs bg-slate-50 border border-slate-200/80 rounded-2xl p-4.5 space-y-2.5 font-mono text-[9px] text-left text-slate-400 select-none">
                   <div className="flex justify-between items-center">
                     <span>CONNECT_NODE</span>
-                    <span className="text-indigo-600 font-bold animate-pulse">OK</span>
+                    <span className="text-indigo-600 font-bold animate-pulse">
+                      OK
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span>FIREBASE_INDEX_PING</span>
-                    <span className="text-emerald-600 font-bold animate-pulse">RESOLVED</span>
+                    <span className="text-emerald-600 font-bold animate-pulse">
+                      RESOLVED
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span>GEMINI_MULTIMODAL_SYNC</span>
-                    <span className="text-indigo-600 font-bold animate-pulse">PENDING...</span>
+                    <span className="text-indigo-600 font-bold animate-pulse">
+                      PENDING...
+                    </span>
                   </div>
                 </div>
               </div>
             ) : (
               // Completed Analysis View
               <div className="space-y-6 animate-slideUp">
-                
                 {/* 1. Triage Summary metrics */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  
                   {/* Risk Score Circular Metric */}
                   <div className="rounded-3xl border border-slate-200/60 bg-white p-4.5 shadow-premium flex flex-col justify-between items-center text-center">
                     <div className="flex items-center gap-1 text-slate-400 mb-2">
@@ -198,14 +212,33 @@ export default function TrackPage() {
                         Risk Score
                       </span>
                     </div>
-                    
+
                     <div className="relative flex items-center justify-center my-1.5">
                       {/* SVG Circle Progress */}
                       <svg className="w-18 h-18 transform -rotate-90">
-                        <circle cx="36" cy="36" r="30" stroke="oklch(0.95 0.01 240)" strokeWidth="5.5" fill="transparent" />
-                        <circle cx="36" cy="36" r="30" stroke="oklch(0.52 0.22 265)" strokeWidth="5.5" fill="transparent"
-                                strokeDasharray={2 * Math.PI * 30}
-                                strokeDashoffset={2 * Math.PI * 30 * (1 - (pipelineResult.priority_score || 70) / 100)} />
+                        <circle
+                          cx="36"
+                          cy="36"
+                          r="30"
+                          stroke="oklch(0.95 0.01 240)"
+                          strokeWidth="5.5"
+                          fill="transparent"
+                        />
+                        <circle
+                          cx="36"
+                          cy="36"
+                          r="30"
+                          stroke="oklch(0.52 0.22 265)"
+                          strokeWidth="5.5"
+                          fill="transparent"
+                          strokeDasharray={2 * Math.PI * 30}
+                          strokeDashoffset={
+                            2 *
+                            Math.PI *
+                            30 *
+                            (1 - (pipelineResult.priority_score || 70) / 100)
+                          }
+                        />
                       </svg>
                       <span className="absolute text-base font-black text-slate-800">
                         {pipelineResult.priority_score || "N/A"}
@@ -358,8 +391,12 @@ export default function TrackPage() {
 
                         {/* Signature Block */}
                         <div className="mt-8 pt-6 border-t border-slate-100 font-sans text-[10px] text-slate-400 select-none flex justify-between items-center">
-                          <span>Issued autonomously on behalf of the public</span>
-                          <span className="font-mono text-[9px] bg-slate-50 px-2 py-1 border rounded-lg text-slate-500">DIGITAL_TOKEN_APPROVED</span>
+                          <span>
+                            Issued autonomously on behalf of the public
+                          </span>
+                          <span className="font-mono text-[9px] bg-slate-50 px-2 py-1 border rounded-lg text-slate-500">
+                            DIGITAL_TOKEN_APPROVED
+                          </span>
                         </div>
                       </div>
                     </div>

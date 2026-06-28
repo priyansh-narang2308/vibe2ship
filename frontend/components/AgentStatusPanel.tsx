@@ -15,14 +15,14 @@ import {
   AlertTriangle,
   XCircle,
   Loader2,
-  Sparkles
+  Sparkles,
 } from "lucide-react";
 import {
   getWebSocketUrl,
   simulateWebSocketStream,
   AgentLog,
   ReportPayload,
-} from "@/lib/api";
+} from "../lib/api";
 
 interface AgentStatusPanelProps {
   reportId: string;
@@ -173,7 +173,6 @@ export default function AgentStatusPanel({
 
   return (
     <div className="flex flex-col h-[420px] rounded-3xl border border-slate-800 bg-slate-950 text-slate-100 overflow-hidden shadow-2xl relative">
-      
       {/* Background terminal overlay glow */}
       <div className="absolute top-0 right-0 w-36 h-36 bg-indigo-500/5 blur-[50px] pointer-events-none" />
 
@@ -196,7 +195,8 @@ export default function AgentStatusPanel({
             {mode === "connecting" && "Establishing agent connection..."}
             {mode === "live" && (
               <>
-                Autonomous Agent Stream <Sparkles className="h-3 w-3 text-indigo-400 animate-pulse" />
+                Autonomous Agent Stream{" "}
+                <Sparkles className="h-3 w-3 text-indigo-400 animate-pulse" />
               </>
             )}
             {mode === "simulated" && "Autonomous Agent Stream (Simulated)"}
@@ -215,7 +215,9 @@ export default function AgentStatusPanel({
         {logs.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-slate-500 space-y-3">
             <Loader2 className="h-6 w-6 animate-spin text-slate-700" />
-            <span className="text-[11px] font-bold tracking-wider uppercase text-slate-600">Awaiting node response...</span>
+            <span className="text-[11px] font-bold tracking-wider uppercase text-slate-600">
+              Awaiting node response...
+            </span>
           </div>
         )}
 
@@ -233,15 +235,17 @@ export default function AgentStatusPanel({
               className="flex items-start gap-4 border-l border-slate-800 pl-5 py-0.5 relative transition-all duration-300 animate-fadeIn"
             >
               {/* Outer status bullet */}
-              <span className={`absolute left-[-4.5px] top-2 h-2 w-2 rounded-full bg-slate-950 border ${
-                log.status === "SUCCESS"
-                  ? "border-emerald-500 bg-emerald-500 shadow-glow-success"
-                  : log.status === "WARNING"
-                    ? "border-amber-500 bg-amber-500"
-                    : log.status === "ERROR"
-                      ? "border-rose-500 bg-rose-500 shadow-glow-error"
-                      : "border-slate-700"
-              }`} />
+              <span
+                className={`absolute left-[-4.5px] top-2 h-2 w-2 rounded-full bg-slate-950 border ${
+                  log.status === "SUCCESS"
+                    ? "border-emerald-500 bg-emerald-500 shadow-glow-success"
+                    : log.status === "WARNING"
+                      ? "border-amber-500 bg-amber-500"
+                      : log.status === "ERROR"
+                        ? "border-rose-500 bg-rose-500 shadow-glow-error"
+                        : "border-slate-700"
+                }`}
+              />
 
               {/* Agent Specific Icon */}
               {log.agent && (

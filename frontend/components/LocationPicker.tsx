@@ -1,8 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Compass, CheckCircle2, Navigation, AlertCircle, MapPin } from "lucide-react";
-import { GPSLocation } from "@/lib/api";
+import {
+  Compass,
+  CheckCircle2,
+  Navigation,
+  AlertCircle,
+  MapPin,
+} from "lucide-react";
+import { GPSLocation } from "../lib/api";
 
 interface LocationPickerProps {
   location: GPSLocation;
@@ -13,21 +19,24 @@ const DEMO_LOCATION_PRESETS = [
   {
     name: "Koramangala, Bangalore",
     lat: 12.972,
-    lng: 77.642
+    lng: 77.642,
   },
   {
     name: "Singasandra, Bangalore",
     lat: 12.925,
-    lng: 77.595
+    lng: 77.595,
   },
   {
     name: "Shivajinagar, Pune",
     lat: 18.528,
-    lng: 73.842
-  }
+    lng: 73.842,
+  },
 ];
 
-export default function LocationPicker({ location, onLocationChange }: LocationPickerProps) {
+export default function LocationPicker({
+  location,
+  onLocationChange,
+}: LocationPickerProps) {
   const [gpsLoading, setGpsLoading] = useState(false);
   const [gpsSuccess, setGpsSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -46,7 +55,7 @@ export default function LocationPicker({ location, onLocationChange }: LocationP
       (position) => {
         const detected = {
           latitude: Number(position.coords.latitude.toFixed(6)),
-          longitude: Number(position.coords.longitude.toFixed(6))
+          longitude: Number(position.coords.longitude.toFixed(6)),
         };
         onLocationChange(detected);
         setGpsLoading(false);
@@ -54,10 +63,12 @@ export default function LocationPicker({ location, onLocationChange }: LocationP
       },
       (error) => {
         setGpsLoading(false);
-        setErrorMsg("Failed to retrieve GPS. Choose a demo preset or type manually.");
+        setErrorMsg(
+          "Failed to retrieve GPS. Choose a demo preset or type manually.",
+        );
         console.error("GPS error:", error);
       },
-      { enableHighAccuracy: true, timeout: 6000 }
+      { enableHighAccuracy: true, timeout: 6000 },
     );
   };
 
@@ -67,12 +78,15 @@ export default function LocationPicker({ location, onLocationChange }: LocationP
     setErrorMsg(null);
   };
 
-  const handleManualChange = (field: "latitude" | "longitude", value: string) => {
+  const handleManualChange = (
+    field: "latitude" | "longitude",
+    value: string,
+  ) => {
     const numVal = parseFloat(value);
     if (!isNaN(numVal)) {
       onLocationChange({
         ...location,
-        [field]: numVal
+        [field]: numVal,
       });
       setGpsSuccess(false);
     }
@@ -82,7 +96,9 @@ export default function LocationPicker({ location, onLocationChange }: LocationP
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <label className="text-sm font-bold text-slate-800 tracking-tight flex items-center gap-1.5">
-          <span className="flex h-5.5 w-5.5 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 text-xs font-black">2</span>
+          <span className="flex h-5.5 w-5.5 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 text-xs font-black">
+            2
+          </span>
           Pin Geographic Location
         </label>
         <button
@@ -103,11 +119,13 @@ export default function LocationPicker({ location, onLocationChange }: LocationP
             </>
           ) : gpsSuccess ? (
             <>
-              <CheckCircle2 className="h-4 w-4 text-emerald-600 animate-pulse" /> Telemetry Verified
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 animate-pulse" />{" "}
+              Telemetry Verified
             </>
           ) : (
             <>
-              <Compass className="h-4 w-4 text-indigo-600 animate-pulse" /> Detect GPS coordinates
+              <Compass className="h-4 w-4 text-indigo-600 animate-pulse" />{" "}
+              Detect GPS coordinates
             </>
           )}
         </button>
@@ -127,7 +145,9 @@ export default function LocationPicker({ location, onLocationChange }: LocationP
             Latitude Grid
           </label>
           <div className="relative group">
-            <span className="absolute inset-y-0 left-3.5 flex items-center text-slate-400 font-bold text-xs select-none">Lat</span>
+            <span className="absolute inset-y-0 left-3.5 flex items-center text-slate-400 font-bold text-xs select-none">
+              Lat
+            </span>
             <input
               type="number"
               step="any"
@@ -140,13 +160,15 @@ export default function LocationPicker({ location, onLocationChange }: LocationP
             />
           </div>
         </div>
-        
+
         <div>
           <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 select-none">
             Longitude Grid
           </label>
           <div className="relative group">
-            <span className="absolute inset-y-0 left-3.5 flex items-center text-slate-400 font-bold text-xs select-none">Lng</span>
+            <span className="absolute inset-y-0 left-3.5 flex items-center text-slate-400 font-bold text-xs select-none">
+              Lng
+            </span>
             <input
               type="number"
               step="any"
@@ -168,7 +190,9 @@ export default function LocationPicker({ location, onLocationChange }: LocationP
         </span>
         <div className="flex flex-wrap gap-2.5">
           {DEMO_LOCATION_PRESETS.map((preset, idx) => {
-            const isSelected = location.latitude === preset.lat && location.longitude === preset.lng;
+            const isSelected =
+              location.latitude === preset.lat &&
+              location.longitude === preset.lng;
             return (
               <button
                 key={idx}
@@ -181,11 +205,13 @@ export default function LocationPicker({ location, onLocationChange }: LocationP
                 type="button"
                 id={`preset-loc-${idx}`}
               >
-                <MapPin className={`h-4 w-4 shrink-0 transition-transform ${
-                  isSelected
-                    ? "text-indigo-600 animate-bounce scale-110"
-                    : "text-slate-400 group-hover:text-indigo-500"
-                }`} />
+                <MapPin
+                  className={`h-4 w-4 shrink-0 transition-transform ${
+                    isSelected
+                      ? "text-indigo-600 animate-bounce scale-110"
+                      : "text-slate-400 group-hover:text-indigo-500"
+                  }`}
+                />
                 {preset.name}
               </button>
             );
