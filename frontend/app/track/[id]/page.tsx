@@ -23,9 +23,9 @@ import {
   ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
-import AgentStatusPanel from "@/components/AgentStatusPanel";
-import IssueMap from "@/components/IssueMap";
-import { ReportPayload } from "../lib/api";
+import AgentStatusPanel from "../../../components/AgentStatusPanel";
+import IssueMap from "../../../components/IssueMap";
+import { ReportPayload } from "../../../lib/api";
 
 export default function TrackPage() {
   const params = useParams();

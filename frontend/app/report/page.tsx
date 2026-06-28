@@ -9,8 +9,8 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-import MediaPicker from "@/components/MediaPicker";
-import LocationPicker from "@/components/LocationPicker";
+import MediaPicker from "../../components/MediaPicker";
+import LocationPicker from "../../components/LocationPicker";
 import { GPSLocation, submitReport } from "../../lib/api";
 
 export default function ReportPage() {

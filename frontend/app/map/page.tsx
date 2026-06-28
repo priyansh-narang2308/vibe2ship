@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import IssueMap from "@/components/IssueMap";
+import IssueMap from "../../components/IssueMap";
 import { GPSLocation } from "../../lib/api";
 import { Navigation, SlidersHorizontal, Eye } from "lucide-react";
 
